@@ -2,5 +2,5 @@ MComm
 =====
 
 Molecular Communication Project
-\nContributors:
+Contributors:
 Chinmay, Sourav,Ruhavi.
