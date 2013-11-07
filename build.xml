@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- HW 2-4 program build file
+ -->
+<project name="Icecreams" default="build" basedir=".">
+	<property environment="env"/>
+	
+	<property name="classes" location="bin"/>
+
+	<path id="project.classpath">
+		<pathelement location="bin"/>
+	</path>
+	<target name="init">
+		<mkdir dir="${classes}"/>
+	</target>
+	<target name="clean">
+		<delete dir="${classes}"/>
+	</target>
+	<target name="build" depends="init">
+		<echo message="${ant.project.name}: ${ant.file}"/>
+		<javac destdir="${classes}" debug="on">
+			<src path="src"/>
+			<classpath refid="project.classpath"/>
+		</javac>
+	</target>
+	<target name="run" depends="build">
+		<java fork="yes" classname="icecream.IceTest" 
+			failonerror="true" dir="${basedir}">
+			<classpath refid="project.classpath"/>
+		</java>
+	</target>
+</project>
