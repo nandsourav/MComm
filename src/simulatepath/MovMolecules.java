@@ -6,7 +6,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
+
+
 public class MovMolecules {
+	
 	static double stepLengthX;
 	static double stepLengthY;
 	static double stepLengthZ;
@@ -24,34 +27,64 @@ public class MovMolecules {
 	static int[] steparr = {1,0,-1};
 	static String delim = ",";
 	static String newline = "";
+	/*static ArrayList<Double> arrx = new ArrayList<Double>();
+	static ArrayList<Double> arry= new ArrayList<Double>();
+	static ArrayList<Double> arrz= new ArrayList<Double>();*/
 	public static void main(String[] args) throws IOException{
+	
 		boolean reachFlag = false;
 		if(args.length==0)
 			readParams(inFile);
 		else
 			readParams(args[0]);
 		FileWriter writer= new FileWriter(new File(outFile));
+		
 		long time = System.nanoTime();
 		while(System.nanoTime()-time < (long)maxSimulationTime){
 			writer.write(newline+curpos.x+delim+curpos.y+delim+curpos.z);
+			/*arrx.add(curpos.x);
+			arry.add(curpos.y);
+			arrz.add(curpos.z);*/
 			newline = "\n";
 			curpos.x = curpos.x + stepLengthX*steparr[(int) (Math.random()*3)];
 			curpos.y = curpos.y + stepLengthY*steparr[(int) (Math.random()*3)];
 			curpos.z = curpos.z + stepLengthZ*steparr[(int) (Math.random()*3)];
+			
 			if(hasReachDestination(curpos)){
 				writer.write(newline+curpos.x+delim+curpos.y+delim+curpos.z);
 				reachFlag = true;
 				break;
 			}
+			
+			if(hasReachedBoundry(curpos)){
+				writer.write(newline+curpos.x+delim+curpos.y+delim+curpos.z);
+				newline = "\n";
+				curpos=getNewPosition(curpos);
+				
+			}
+			
+			
+			
 			writer.flush();
 		}
 		writer.flush();
 		writer.close();
 		if(reachFlag)
 			System.out.println("Hooray the molecule reached to destination");
-		else 
+		else {
 			System.out.println(":( the molecule couldn't reach its destination");
+		}
+		System.out.println();
+			/*System.out.println("x points"+arrx);
+			System.out.println("y"+arry);
+			System.out.println("z"+arrz);*/
+		
 	}
+	
+	
+	
+
+
 	public static void readParams(String inFile) throws IOException{
 		String line;
 		BufferedReader br = new BufferedReader(new FileReader(inFile));
@@ -116,6 +149,40 @@ public class MovMolecules {
 				+(reciever.z-curpos.z)*(reciever.z-curpos.z)) <= recieverRadius)
 			b=true;
 		return b;
+	}
+	
+	private static Position getNewPosition(Position curpos) {
+		//Position curposnew=new Position();
+		if(curpos.x<0){
+			curpos.x=curpos.x+1;
+		}
+		if(curpos.y<0){
+			curpos.y=curpos.y+1;
+		}
+		if(curpos.z<0){
+			curpos.z=curpos.z+1;
+		}
+		if(curpos.x>100){
+			curpos.x=curpos.x-1;
+		}
+		if(curpos.y>150){
+			curpos.y=curpos.y-1;
+		}
+		if(curpos.z>300){
+			curpos.z=curpos.z-1;
+		}
+		
+		
+		return curpos;
+	}
+
+	
+	private static boolean hasReachedBoundry(Position curpos) {
+		boolean boundryFlag=false;
+		if(curpos.x<=0 |curpos.x>=100 | curpos.y<=0 |curpos.y>=50 | curpos.z<=0 | curpos.z>=300){
+			boundryFlag=true;
+		}
+		return boundryFlag;
 	}
 	
 }

@@ -4,7 +4,7 @@ stepLengthZ 1
 mediumDimensionX 150
 mediumDimensionY 200
 mediumDimensionZ 500
-maxSimulationTime 1000000000
-senderPosition (100,100,100)
-recieverCenter (102,150,150)
-recieverRadius 20
+maxSimulationTime 100000000000
+senderPosition (60,75,80)
+recieverCenter (90,90,90)
+recieverRadius 1
