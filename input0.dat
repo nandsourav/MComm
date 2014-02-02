@@ -1,0 +1,31 @@
+**********Information about Medium*******************
+mediumDimensionX 150
+mediumDimensionY 200
+mediumDimensionZ 500
+maxSimulationTime 6000000000
+*distSendReciever 20
+*** If you want to assign a sender's position and reciever's center then 
+  enter the co-ordinates within the following boundary
+* x-coordinate [-mediumDimensionX/2 , mediumDimensionX/2]
+* y-coordinate [-mediumDimensionY/2 , mediumDimensionY/2]
+* z-coordinate [-mediumDimensionZ/2 , mediumDimensionZ/2]
+* Also comment the parameter disSendReciever to make these two parameters working.
+
+senderPosition (10,10,10)
+recieverCenter (20,20,20)
+recieverRadius 2
+
+**********Information about Molecules*******************
+noOfMolecules 10
+stepLengthX 1
+stepLengthY 1
+stepLengthZ 1
+
+*** Below parameters are for active propagation
+velRail 0.5
+probDrail 0.1
+
+*********Information about microtubule cylindrical tracks*************
+plusEndCentre (20,20,20)
+minusEndCentre (10,10,10)
+radiusMicroTubule 0.06
