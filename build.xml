@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- HW 2-4 program build file
  -->
-<project name="Icecreams" default="build" basedir=".">
+<project name="MComm" default="build" basedir=".">
 	<property environment="env"/>
 	
 	<property name="classes" location="bin"/>
@@ -23,7 +23,7 @@
 		</javac>
 	</target>
 	<target name="run" depends="build">
-		<java fork="yes" classname="icecream.IceTest" 
+		<java fork="yes" classname="simulatepath.MovMolecules" 
 			failonerror="true" dir="${basedir}">
 			<classpath refid="project.classpath"/>
 		</java>
