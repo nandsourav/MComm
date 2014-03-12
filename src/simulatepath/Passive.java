@@ -22,6 +22,7 @@ public class Passive extends JPanel implements ActionListener{
 	static double mediumDimensionY;
 	static double mediumDimensionZ;
 	static double maxSimulationTime;
+	static long maxSimulationSteps;
 	static double stepLengthX;
 	static double stepLengthY;
 	static double stepLengthZ;
@@ -94,6 +95,9 @@ public class Passive extends JPanel implements ActionListener{
 			else if(line.startsWith("maxSimulationTime")){
 				maxSimulationTime = Double.parseDouble(param);
 			}
+			else if(line.startsWith("maxSimulationSteps")){
+				maxSimulationSteps = Long.parseLong(param);//  Double.parseDouble(param);
+			}
 			else if(line.startsWith("noOfMolecules")){
 				noOfMolecules = Integer.parseInt(param);
 			}
@@ -161,9 +165,13 @@ public class Passive extends JPanel implements ActionListener{
 	private void simulateThis(Molecule molecule, FileWriter writer){
 		String newline = "";
 		long time = System.nanoTime();
+	    long currentStep = 0;
 		boolean reachFlag = false;
 		try {
-			while(System.nanoTime()-time < (long)maxSimulationTime){
+			//TODO Change to number of steps
+			if (maxSimulationTime > 0)
+			{
+			while((System.nanoTime()-time < (long)maxSimulationTime) && (currentStep++ < maxSimulationSteps)){
 				Position curpos = molecule.getPosition();
 				writer.write(newline + curpos.getX() +
 						delim + curpos.getY() +
@@ -179,16 +187,36 @@ public class Passive extends JPanel implements ActionListener{
 				checkBoundary(curpos);
 				writer.flush();
 			}
+			}else
+				while((currentStep++ < maxSimulationSteps)){
+					Position curpos = molecule.getPosition();
+					writer.write(newline + curpos.getX() +
+							delim + curpos.getY() +
+							delim + curpos.getZ());
+					newline = "\n";
+					if(hasReachDestination(curpos)){
+						reachFlag = true;
+						break;
+					}
+					curpos.setX(curpos.getX() + molecule.getStepLengthX()*steparr[(int) (Math.random()*3)]);
+					curpos.setY(curpos.getY() + molecule.getStepLengthY()*steparr[(int) (Math.random()*3)]);
+					curpos.setZ(curpos.getZ() + molecule.getStepLengthZ()*steparr[(int) (Math.random()*3)]);
+					checkBoundary(curpos);
+					writer.flush();
+				}
 			writer.flush();
 			writer.close();
 		}catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		if(reachFlag)
+		if(reachFlag){
 			System.out.println(":) Hooray this molecule reached to destination");
-		else 
+			System.out.println("Number of steps "+currentStep);
+		}
+		else {
 			System.out.println(":( This molecule couldn't reach its destination");
+		System.out.println("Number of steps "+currentStep);}
 
 	}
 	public void paintComponent(Graphics g){

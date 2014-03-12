@@ -2,7 +2,8 @@
 mediumDimensionX 150
 mediumDimensionY 200
 mediumDimensionZ 500
-maxSimulationTime 6000000000
+maxSimulationTime -1
+maxSimulationSteps 1000000
 *distSendReciever 20
 *** If you want to assign a sender's position and reciever's center then 
   enter the co-ordinates within the following boundary
