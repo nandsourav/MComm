@@ -18,9 +18,11 @@ mediumDimensionY: It is defined as the length of Y dimension.
 	
 mediumDimensionZ: It is defined as the length of Z dimension.
 	
-maxSimulationTime: It is given as the time taken or the time calculated for the simulation of the whole system per molecule.
-                   The time is measured in terms of nano seconds.
-	
+maxSimulationTime: It is given as the *real* time taken or the time calculated for the simulation of the whole system per molecule.
+                   The time is measured in terms of nano seconds. A value of -1 causes this to disabled and not be the limiting factor but
+                   maxSimulationSteps is used exclusively
+maxSimulationSteps: It is the number of "time" increments or steps the the simulation should run for. Simultion stops when this number is reached.
+	                Thus is the "virtual simulation time".  This can be used exlusively or along with real (system) time limitation.
 distSendReciever: This is the distance between the Sender and the Receiver.
 	
 *** Considering the distance between the sender and receiver to be 'd' and  considering the origin or the center, the distance between the sender and  

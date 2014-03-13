@@ -23,6 +23,7 @@ public class Active extends JPanel implements ActionListener{
 	static double mediumDimensionY;
 	static double mediumDimensionZ;
 	static double maxSimulationTime;
+	static long maxSimulationSteps;
 	static double stepLengthX;
 	static double stepLengthY;
 	static double stepLengthZ;
@@ -101,6 +102,9 @@ public class Active extends JPanel implements ActionListener{
 			}
 			else if(line.startsWith("maxSimulationTime")){
 				maxSimulationTime = Double.parseDouble(param);
+			}
+			else if(line.startsWith("maxSimulationSteps")){
+				maxSimulationSteps = Long.parseLong(param);
 			}
 			else if(line.startsWith("noOfMolecules")){
 				noOfMolecules = Integer.parseInt(param);
@@ -204,7 +208,9 @@ public class Active extends JPanel implements ActionListener{
 	private void simulatePropagation(Molecule molecule, FileWriter writer, FileWriter fw){
 		String newline = "";
 		long time = System.nanoTime();
+		long currentStep = 0;
 		long elapsed = 0;
+		long elapsedSteps = 0;
 		boolean reachFlag = false;
 		boolean onRailFlag = false;
 		//double distance = distSendReciever!=0?distSendReciever:;
@@ -223,7 +229,10 @@ public class Active extends JPanel implements ActionListener{
 					}
 				}
 			}
-			while((elapsed=System.nanoTime()-time) < (long)maxSimulationTime){
+			//TODO Change to number of steps
+			if (maxSimulationTime > 0)
+			{
+			while((System.nanoTime()-time < (long)maxSimulationTime) && (currentStep++ < maxSimulationSteps)){
 				curpos = molecule.getPosition();
 				
 				writer.write(newline + curpos.getX() +
@@ -233,6 +242,7 @@ public class Active extends JPanel implements ActionListener{
 				if(hasReachDestination(curpos)){
 					reachFlag = true;
 					elapsed=System.nanoTime()-time;
+					elapsedSteps = currentStep;
 					break;
 				}
 				if(probDrail!=0){
@@ -312,6 +322,99 @@ public class Active extends JPanel implements ActionListener{
 				}
 				writer.flush();
 			}
+			}else
+				while ((currentStep++ < maxSimulationSteps)){
+
+					curpos = molecule.getPosition();
+					
+					writer.write(newline + curpos.getX() +
+							delim + curpos.getY() +
+							delim + curpos.getZ());
+					newline = "\n";
+					if(hasReachDestination(curpos)){
+						reachFlag = true;
+						elapsed=System.nanoTime()-time;
+						elapsedSteps = currentStep;
+						break;
+					}
+					if(probDrail!=0){
+						if(onRailFlag){
+							if(hasDRailed()){
+								onRailFlag = false;
+								System.out.println("off rail");
+								molecule.setCurrentMicrotubule(null);
+								Position newPos = new Position();
+								newPos.setX(curpos.getX() + molecule.getStepLengthX()*steparr[(int) (Math.random()*3)]);
+								newPos.setY(curpos.getY() + molecule.getStepLengthY()*steparr[(int) (Math.random()*3)]);
+								newPos.setZ(curpos.getZ() + molecule.getStepLengthZ()*steparr[(int) (Math.random()*3)]);
+								checkBoundary(newPos);
+								Position nextPos = checkRailPos(curpos,newPos,molecule);
+								if(nextPos!=null){
+									//distance = curpos.getDistance(reciever);
+									molecule.setPosition(nextPos);
+									onRailFlag = true;
+									System.out.println("On Rail");
+								}
+								else{
+									molecule.setPosition(newPos);
+								}
+							}
+							else{
+								Position plusend = molecule.getCurrentMicrotubule().getPlusEndCentre();
+								Position minusend = molecule.getCurrentMicrotubule().getMinusEndCentre();
+								Position newPos = new Position();
+								Position perp = new Position();	
+								double x2 = plusend.getX();
+								double y2 = plusend.getY();
+								double z2 = plusend.getZ();
+								double x1 = minusend.getX();
+								double y1 = minusend.getY();
+								double z1 = minusend.getZ();
+								double d = curpos.getX();
+								double e = curpos.getY();
+								double f = curpos.getZ();
+								
+								double t = ((x2 - d)*(x2-x1) +
+										   (y2 - e)*(y2-y1) +
+										   (z2 - f)*(z2-z1)) / ((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1) + (z2-z1)*(z2-z1));
+								perp.setX(d + (x2-x1)*t);
+								perp.setY(e + (y2-y1)*t);
+								perp.setZ(f + (z2-z1)*t);
+								double distance = perp.getDistance(curpos);
+								curpos.setX((velRail*perp.getX() + (distance-velRail)*curpos.getX())/distance);
+								curpos.setY((velRail*perp.getY() + (distance-velRail)*curpos.getY())/distance);
+								curpos.setZ((velRail*perp.getZ() + (distance-velRail)*curpos.getZ())/distance);
+								//System.out.println(curpos.getX()+","+curpos.getY()+","+curpos.getZ());
+								//molecule.setPosition(curpos);
+							}
+						}
+						else{
+							Position newPos = new Position();
+							newPos.setX(curpos.getX() + molecule.getStepLengthX()*steparr[(int) (Math.random()*3)]);
+							newPos.setY(curpos.getY() + molecule.getStepLengthY()*steparr[(int) (Math.random()*3)]);
+							newPos.setZ(curpos.getZ() + molecule.getStepLengthZ()*steparr[(int) (Math.random()*3)]);
+							checkBoundary(newPos);
+							Position nextPos = checkRailPos(curpos,newPos,molecule);
+							if(nextPos!=null){
+								//distance = curpos.getDistance(reciever);
+								molecule.setPosition(nextPos);
+								onRailFlag = true;
+								System.out.println("Gets on Rail");
+							}
+							else{
+								molecule.setPosition(newPos);
+							}
+						}
+					}
+					else{
+						curpos.setX(curpos.getX() + molecule.getStepLengthX()*steparr[(int) (Math.random()*3)]);
+						curpos.setY(curpos.getY() + molecule.getStepLengthY()*steparr[(int) (Math.random()*3)]);
+						curpos.setZ(curpos.getZ() + molecule.getStepLengthZ()*steparr[(int) (Math.random()*3)]);
+						checkBoundary(curpos);
+					}
+					writer.flush();
+				
+				}
 			writer.flush();
 			writer.close();
 		}catch (IOException e) {
@@ -321,7 +424,7 @@ public class Active extends JPanel implements ActionListener{
 		if(reachFlag){
 			System.out.println(":) Hooray this molecule reached to destination");
 			try {
-				fw.write(elapsed + newline);
+				fw.write(elapsed + "\t\t\t"+elapsedSteps + newline);
 				fw.flush();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
