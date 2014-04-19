@@ -1,5 +1,5 @@
 bin
 .project
 .classpath
-dest.txt
-output*.txt
+output
+.DS_Store
