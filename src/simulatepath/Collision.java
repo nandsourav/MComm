@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
-public class Active extends JPanel implements ActionListener{
+public class Collision extends JPanel implements ActionListener{
 
 	/**
 	 * 
@@ -50,37 +50,51 @@ public class Active extends JPanel implements ActionListener{
 		else
 			readParams(args[0]);
 		final FileWriter fileWriter= new FileWriter(new File(reachFile+".txt"));
-//		final ArrayList<Molecule> mols = new ArrayList<Molecule>(noOfMolecules);
-//		final ArrayList<FileWriter> writers = new ArrayList<FileWriter>(noOfMolecules);
+		final ArrayList<Molecule> mols = new ArrayList<Molecule>(noOfMolecules);
+		final ArrayList<FileWriter> writers = new ArrayList<FileWriter>(noOfMolecules);
 		//FileWriter writer= new FileWriter(new File(outFile));
+		if(generateOutputFile){
+			new File("output").mkdir();
+		}
 		for(int i=0;i<noOfMolecules;i++){
 			final Position p = new Position();
 			p.setX(sender.getX());
 			p.setY(sender.getY());
 			p.setZ(sender.getZ());
-			final int j = i;
-//			mols.add(i,new Molecule(stepLengthX, stepLengthY, stepLengthZ, p,velRail));
-//			writers.add(i, new FileWriter(new File(outFile+i+".txt")));
-			javax.swing.SwingUtilities.invokeLater(new Runnable() {
-				public void run() {
-						try {
-							if(generateOutputFile){
-								new File("output").mkdir();
-								(new Active()).simulatePropagation(new Molecule(stepLengthX, stepLengthY, stepLengthZ, 
-										p,velRail,radius), fileWriter, new FileWriter(new File("output/"+outFile + j +".txt")));
-							}
-							else{
-								(new Active()).simulatePropagation(new Molecule(stepLengthX, stepLengthY, stepLengthZ, 
-										p,velRail,radius),fileWriter);
-							}
-								
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			});
+			//final int j = i;
+			mols.add(i,new Molecule(stepLengthX, stepLengthY, stepLengthZ, p,velRail,radius));
+			if(generateOutputFile){
+				writers.add(i,new FileWriter(new File("output/"+outFile + i +".txt")));
+			}
 		}
+		if(generateOutputFile){
+			(new Collision()).simulatePropagation(mols, fileWriter, writers);
+		}
+		else{
+			(new Collision()).simulatePropagation(mols,fileWriter, null);
+		}
+
+//			writers.add(i, new FileWriter(new File(outFile+i+".txt")));
+//			javax.swing.SwingUtilities.invokeLater(new Runnable() {
+//				public void run() {
+//						try {
+//							if(generateOutputFile){
+//								new File("output").mkdir();
+//								(new Collision()).simulatePropagation(new Molecule(stepLengthX, stepLengthY, stepLengthZ, 
+//										p,velRail,radius), fileWriter, new FileWriter(new File("output/"+outFile + j +".txt")));
+//							}
+//							else{
+//								(new Collision()).simulatePropagation(new Molecule(stepLengthX, stepLengthY, stepLengthZ, 
+//										p,velRail,radius),fileWriter);
+//							}
+//								
+//					} catch (IOException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//				}
+//			});
+//		}
 	}
 
 	public static void readParams(String inFile) throws IOException{
@@ -225,151 +239,202 @@ public class Active extends JPanel implements ActionListener{
 			curpos.setZ(-mediumDimensionZ/2);
 	}
 
-	private void simulatePropagation(Molecule molecule, FileWriter... writer){
+	private void simulatePropagation(ArrayList<Molecule> listOfMolecule, FileWriter writer, ArrayList<FileWriter> listOfWriter){
 		String newline = "";
 		long time = System.nanoTime();
 		long elapsed = 0;
 		double runStep = maxSimulationTime;
-		boolean reachFlag = false;
-		boolean onRailFlag = false;
+		Position curpos = null;
 		//double distance = distSendReciever!=0?distSendReciever:;
 		if(maxSimulationStep>0){
 			runStep = maxSimulationStep;
 		}
-		try {	
-			Position curpos = molecule.getPosition();
+		for(Molecule molecule: listOfMolecule){
+			curpos = molecule.getPosition();
 			if(probDrail!=0){
-				if(!onRailFlag){
+				if(molecule.getCurrentMicrotubule()==null){
 					for(MicroTubule mt : listOfMicroTubule){
 						Position p = getInitPointOnMicrotubule(mt,curpos);
 						if(p!=null){
 							molecule.setCurrentMicrotubule(mt);
 							molecule.setPosition(p);
-							onRailFlag = true;
 							break;
 						}
 					}
 				}
 			}
-			while(elapsed < (long)runStep){
-				if(maxSimulationStep<=0){
-					elapsed = System.nanoTime()-time;
-				}
-				else{
-					elapsed+=1;
-				}
-				curpos = molecule.getPosition();
-				if(generateOutputFile){
-					writer[1].write(newline + curpos.getX() +
-							delim + curpos.getY() +
-							delim + curpos.getZ());
-					newline = "\n";
-				}
-				
-				if(hasReachDestination(curpos)){
-					reachFlag = true;
-					elapsed=System.nanoTime()-time;
-					break;
-				}
-				if(probDrail!=0){
-					if(onRailFlag){
-						if(hasDRailed()){
-							onRailFlag = false;
-							System.out.println("off rail");
-							molecule.setCurrentMicrotubule(null);
-							Position newPos = new Position();
-							newPos.setX(curpos.getX() + molecule.getStepLengthX()*steparr[(int) (Math.random()*3)]);
-							newPos.setY(curpos.getY() + molecule.getStepLengthY()*steparr[(int) (Math.random()*3)]);
-							newPos.setZ(curpos.getZ() + molecule.getStepLengthZ()*steparr[(int) (Math.random()*3)]);
-							checkBoundary(newPos);
-							Position nextPos = checkRailPos(curpos,newPos,molecule);
-							if(nextPos!=null){
-								//distance = curpos.getDistance(reciever);
-								molecule.setPosition(nextPos);
-								onRailFlag = true;
-								System.out.println("On Rail");
+			else{
+				break;
+			}
+		}
+		try {	
+			while((elapsed=(maxSimulationStep<=0)?(System.nanoTime()-time):(elapsed+1)) < (long)runStep){
+				int indexOfMolecule = -1;
+				for(Molecule molecule:listOfMolecule){
+					indexOfMolecule++;
+					if(!molecule.isReachFlag()){
+						curpos = molecule.getPosition();
+						molecule.setReachTime(molecule.getReachTime()+1);
+						if(generateOutputFile){
+							listOfWriter.get(indexOfMolecule).write(newline + curpos.getX() +
+									delim + curpos.getY() +
+									delim + curpos.getZ());
+							newline = "\n";
+							listOfWriter.get(indexOfMolecule).flush();
+						}
+						if(hasReachDestination(curpos)){
+							if(maxSimulationStep<=0){
+								molecule.setReachTime(System.nanoTime()-time);
 							}
 							else{
-								molecule.setPosition(newPos);
+								molecule.setReachTime(molecule.getReachTime());
+							}
+							molecule.setReachFlag(true);
+							System.out.println(":) Hooray this molecule reached to destination");
+							try {
+								writer.write(elapsed+"\n");
+								writer.flush();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							continue;
+						}
+						if(probDrail!=0){
+							if(molecule.getCurrentMicrotubule()!=null){
+								if(hasDRailed()){
+									System.out.println("off rail");
+									molecule.setCurrentMicrotubule(null);
+									Position newPos = new Position();
+									newPos.setX(curpos.getX() + molecule.getStepLengthX()*steparr[(int) (Math.random()*3)]);
+									newPos.setY(curpos.getY() + molecule.getStepLengthY()*steparr[(int) (Math.random()*3)]);
+									newPos.setZ(curpos.getZ() + molecule.getStepLengthZ()*steparr[(int) (Math.random()*3)]);
+									checkBoundary(newPos);
+									Position nextPos = checkRailPos(curpos,newPos,molecule);
+									if(nextPos!=null){
+										//distance = curpos.getDistance(reciever);
+										if(molecule.check(nextPos,listOfMolecule,indexOfMolecule)){
+											molecule.setPosition(nextPos);
+											System.out.println("On Rail");
+										}
+										else{
+											System.out.println("Collision happened in random space1");
+										}
+									}
+								}
+								else{
+									Position plusend = molecule.getCurrentMicrotubule().getPlusEndCentre();
+									Position minusend = molecule.getCurrentMicrotubule().getMinusEndCentre();
+									//Position newPos = new Position();
+									Position perp = new Position();	
+									double x2 = plusend.getX();
+									double y2 = plusend.getY();
+									double z2 = plusend.getZ();
+									double x1 = minusend.getX();
+									double y1 = minusend.getY();
+									double z1 = minusend.getZ();
+									double d = curpos.getX();
+									double e = curpos.getY();
+									double f = curpos.getZ();
+								
+									double t = ((x2 - d)*(x2-x1) +
+											(y2 - e)*(y2-y1) +
+											(z2 - f)*(z2-z1)) / ((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1) + (z2-z1)*(z2-z1));
+									perp.setX(d + (x2-x1)*t);
+									perp.setY(e + (y2-y1)*t);
+									perp.setZ(f + (z2-z1)*t);
+									double distance = perp.getDistance(curpos);
+									Position temp = new Position((velRail*perp.getX() + (distance-velRail)*curpos.getX())/distance,
+											(velRail*perp.getY() + (distance-velRail)*curpos.getY())/distance,
+											(velRail*perp.getZ() + (distance-velRail)*curpos.getZ())/distance);
+									if(molecule.check(temp,listOfMolecule,indexOfMolecule)){
+										molecule.setPosition(temp);
+									}
+									else{
+										System.out.println("Collision occured while on rail");
+									}
+									//System.out.println(curpos.getX()+","+curpos.getY()+","+curpos.getZ());
+									//molecule.setPosition(curpos);
+								}
+							}
+							else{
+								Position newPos = new Position();
+								newPos.setX(curpos.getX() + molecule.getStepLengthX()*steparr[(int) (Math.random()*3)]);
+								newPos.setY(curpos.getY() + molecule.getStepLengthY()*steparr[(int) (Math.random()*3)]);
+								newPos.setZ(curpos.getZ() + molecule.getStepLengthZ()*steparr[(int) (Math.random()*3)]);
+								checkBoundary(newPos);
+								Position nextPos = checkRailPos(curpos,newPos,molecule);
+								if(nextPos!=null){
+									//distance = curpos.getDistance(reciever);
+									if(molecule.check(nextPos,listOfMolecule,indexOfMolecule)){
+										molecule.setPosition(nextPos);
+										System.out.println("Gets On Rail");
+									}
+									else{
+										System.out.println("Collision happened in random space3");
+									}
+								}
+								else{
+									if(molecule.check(newPos,listOfMolecule,indexOfMolecule)){
+										molecule.setPosition(newPos);
+									}
+									else{
+										System.out.println("Collision happened in random space4");
+									}							
+								}
 							}
 						}
 						else{
-							Position plusend = molecule.getCurrentMicrotubule().getPlusEndCentre();
-							Position minusend = molecule.getCurrentMicrotubule().getMinusEndCentre();
-							Position newPos = new Position();
-							Position perp = new Position();	
-							double x2 = plusend.getX();
-							double y2 = plusend.getY();
-							double z2 = plusend.getZ();
-							double x1 = minusend.getX();
-							double y1 = minusend.getY();
-							double z1 = minusend.getZ();
-							double d = curpos.getX();
-							double e = curpos.getY();
-							double f = curpos.getZ();
-							
-							double t = ((x2 - d)*(x2-x1) +
-									   (y2 - e)*(y2-y1) +
-									   (z2 - f)*(z2-z1)) / ((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1) + (z2-z1)*(z2-z1));
-							perp.setX(d + (x2-x1)*t);
-							perp.setY(e + (y2-y1)*t);
-							perp.setZ(f + (z2-z1)*t);
-							double distance = perp.getDistance(curpos);
-							curpos.setX((velRail*perp.getX() + (distance-velRail)*curpos.getX())/distance);
-							curpos.setY((velRail*perp.getY() + (distance-velRail)*curpos.getY())/distance);
-							curpos.setZ((velRail*perp.getZ() + (distance-velRail)*curpos.getZ())/distance);
-							//System.out.println(curpos.getX()+","+curpos.getY()+","+curpos.getZ());
-							//molecule.setPosition(curpos);
+							Position temp = new Position(curpos.getX() + molecule.getStepLengthX()*steparr[(int) (Math.random()*3)],
+									curpos.getY() + molecule.getStepLengthY()*steparr[(int) (Math.random()*3)],
+									curpos.getZ() + molecule.getStepLengthZ()*steparr[(int) (Math.random()*3)]);
+							checkBoundary(temp);
+							if(molecule.check(temp,listOfMolecule,indexOfMolecule)){
+								molecule.setPosition(temp);
+							}
+							else{
+								System.out.println("Collision occured while on rail2");
+							}
 						}
+						if(generateOutputFile){
+							listOfWriter.get(indexOfMolecule).flush();
+						}
+					}
+				}
+				boolean isFinished = false; 
+				for(Molecule molecule:listOfMolecule){
+					if(!molecule.isReachFlag()){
+						isFinished = false;
+						break;
 					}
 					else{
-						Position newPos = new Position();
-						newPos.setX(curpos.getX() + molecule.getStepLengthX()*steparr[(int) (Math.random()*3)]);
-						newPos.setY(curpos.getY() + molecule.getStepLengthY()*steparr[(int) (Math.random()*3)]);
-						newPos.setZ(curpos.getZ() + molecule.getStepLengthZ()*steparr[(int) (Math.random()*3)]);
-						checkBoundary(newPos);
-						Position nextPos = checkRailPos(curpos,newPos,molecule);
-						if(nextPos!=null){
-							//distance = curpos.getDistance(reciever);
-							molecule.setPosition(nextPos);
-							onRailFlag = true;
-							System.out.println("Gets on Rail");
-						}
-						else{
-							molecule.setPosition(newPos);
-						}
+						isFinished = true;
 					}
 				}
-				else{
-					curpos.setX(curpos.getX() + molecule.getStepLengthX()*steparr[(int) (Math.random()*3)]);
-					curpos.setY(curpos.getY() + molecule.getStepLengthY()*steparr[(int) (Math.random()*3)]);
-					curpos.setZ(curpos.getZ() + molecule.getStepLengthZ()*steparr[(int) (Math.random()*3)]);
-					checkBoundary(curpos);
-				}
-				if(generateOutputFile){
-					writer[1].flush();
-				}
+				if(isFinished)
+					break;
 			}
-			if(generateOutputFile){
-				writer[1].flush();
-				writer[1].close();
-			}
+			writer.close();
+			if(generateOutputFile)
+				for(FileWriter fw: listOfWriter){
+					fw.close();
+				}
 		}catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		if(reachFlag){
-			System.out.println(":) Hooray this molecule reached to destination");
-			try {
-				writer[0].write(elapsed + newline);
-				writer[0].flush();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		else 
-			System.out.println(":( This molecule couldn't reach its destination");
+//		if(reachFlag){
+//			System.out.println(":) Hooray this molecule reached to destination");
+//			try {
+//				writer[0].write(elapsed + newline);
+//				writer[0].flush();
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
+//		else 
+//			System.out.println(":( This molecule couldn't reach its destination");
 
 	}
 	private Position checkRailPos(Position curpos, Position newPos, Molecule molecule) {

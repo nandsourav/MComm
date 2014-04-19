@@ -36,15 +36,15 @@ recieverCenter (50,35,60)
 recieverRadius 1
 
 *********Information about Molecules******************
-noOfMolecules 5
+noOfMolecules 10
 stepLengthX 1
 stepLengthY 1
 stepLengthZ 1
-radiusMolecule 0.05
+radiusOfMolecule 0.05
 
 *********Below parameters are for active propagation
 velRail 0.5
-probDrail 0.1
+probDrail 0.3
 
 ********Information about microtubule cylindrical tracks************
 plusEndCentre (50,35,60)
