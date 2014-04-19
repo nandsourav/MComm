@@ -41,14 +41,15 @@ public class Active extends JPanel implements ActionListener{
 	private static double probDrail;
 	private static MicroTubule microtubule;
 	private static ArrayList<MicroTubule> listOfMicroTubule = new ArrayList<MicroTubule>();
-	
+	private static double radius;
+	static boolean generateOutputFile = false;
 	public static void main(String[] args) throws IOException{
 
 		if(args.length==0)
 			readParams(inFile);
 		else
 			readParams(args[0]);
-		final FileWriter fw= new FileWriter(new File(reachFile+".txt"));
+		final FileWriter fileWriter= new FileWriter(new File(reachFile+".txt"));
 //		final ArrayList<Molecule> mols = new ArrayList<Molecule>(noOfMolecules);
 //		final ArrayList<FileWriter> writers = new ArrayList<FileWriter>(noOfMolecules);
 		//FileWriter writer= new FileWriter(new File(outFile));
@@ -62,9 +63,17 @@ public class Active extends JPanel implements ActionListener{
 //			writers.add(i, new FileWriter(new File(outFile+i+".txt")));
 			javax.swing.SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
-					try {
-						(new Active()).simulatePropagation(new Molecule(stepLengthX, stepLengthY, stepLengthZ, 
-								p,velRail), new FileWriter(new File(outFile + j +".txt")), fw);
+						try {
+							if(generateOutputFile){
+								new File("output").mkdir();
+								(new Active()).simulatePropagation(new Molecule(stepLengthX, stepLengthY, stepLengthZ, 
+										p,velRail ), fileWriter, new FileWriter(new File("output/"+outFile + j +".txt")));
+							}
+							else{
+								(new Active()).simulatePropagation(new Molecule(stepLengthX, stepLengthY, stepLengthZ, 
+										p,velRail),fileWriter);
+							}
+								
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -76,6 +85,7 @@ public class Active extends JPanel implements ActionListener{
 
 	public static void readParams(String inFile) throws IOException{
 		boolean flag = true;
+		
 		String line;
 		BufferedReader br = new BufferedReader(new FileReader(inFile));
 		while((line = br.readLine())!=null){
@@ -179,6 +189,15 @@ public class Active extends JPanel implements ActionListener{
 			else if(line.startsWith("radiusMicroTubule")){
 				microtubule.setRadiusMicroTubule(Double.parseDouble(param));				
 			}
+			else if (line.startsWith("RadiusOfMolecule")){
+				radius = Double.parseDouble(param);
+				
+			}
+			
+			else if (line.startsWith("OutputFile On")){
+				generateOutputFile = true;
+			}
+			
 		}
 		br.close();
 	}
@@ -205,15 +224,19 @@ public class Active extends JPanel implements ActionListener{
 			curpos.setZ(-mediumDimensionZ/2);
 	}
 
-	private void simulatePropagation(Molecule molecule, FileWriter writer, FileWriter fw){
+	private void simulatePropagation(Molecule molecule, FileWriter... writer){
 		String newline = "";
 		long time = System.nanoTime();
 		long currentStep = 0;
 		long elapsed = 0;
 		long elapsedSteps = 0;
+		double runStep = maxSimulationTime;
 		boolean reachFlag = false;
 		boolean onRailFlag = false;
 		//double distance = distSendReciever!=0?distSendReciever:;
+		if(maxSimulationSteps>0){
+			runStep = maxSimulationSteps;
+		}
 		try {	
 			Position curpos = molecule.getPosition();
 			if(probDrail!=0){
@@ -229,16 +252,28 @@ public class Active extends JPanel implements ActionListener{
 					}
 				}
 			}
-			//TODO Change to number of steps
+//<<<<<<< HEAD
+			// Changed to number of steps, check is a max Simulation time is desired
 			if (maxSimulationTime > 0)
 			{
 			while((System.nanoTime()-time < (long)maxSimulationTime) && (currentStep++ < maxSimulationSteps)){
+//=======
+//			while(elapsed < (long)runStep){
+//				if(maxSimulationStep<=0){
+//					elapsed = System.nanoTime()-time;
+//				}
+//				else{
+//					elapsed+=1;
+//				}
+//>>>>>>> refs/remotes/origin/narayanan
 				curpos = molecule.getPosition();
+				if(generateOutputFile){
+					writer[1].write(newline + curpos.getX() +
+							delim + curpos.getY() +
+							delim + curpos.getZ());
+					newline = "\n";
+				}
 				
-				writer.write(newline + curpos.getX() +
-						delim + curpos.getY() +
-						delim + curpos.getZ());
-				newline = "\n";
 				if(hasReachDestination(curpos)){
 					reachFlag = true;
 					elapsed=System.nanoTime()-time;
@@ -320,17 +355,21 @@ public class Active extends JPanel implements ActionListener{
 					curpos.setZ(curpos.getZ() + molecule.getStepLengthZ()*steparr[(int) (Math.random()*3)]);
 					checkBoundary(curpos);
 				}
-				writer.flush();
+				if(generateOutputFile){
+					writer[1].flush();
+				}
 			}
+//<<<<<<< HEAD
 			}else
 				while ((currentStep++ < maxSimulationSteps)){
 
 					curpos = molecule.getPosition();
-					
-					writer.write(newline + curpos.getX() +
+					if(generateOutputFile){
+					writer[1].write(newline + curpos.getX() +
 							delim + curpos.getY() +
 							delim + curpos.getZ());
 					newline = "\n";
+					}
 					if(hasReachDestination(curpos)){
 						reachFlag = true;
 						elapsed=System.nanoTime()-time;
@@ -412,11 +451,17 @@ public class Active extends JPanel implements ActionListener{
 						curpos.setZ(curpos.getZ() + molecule.getStepLengthZ()*steparr[(int) (Math.random()*3)]);
 						checkBoundary(curpos);
 					}
-					writer.flush();
+					if(generateOutputFile){
+					writer[1].flush();
+					}
 				
 				}
-			writer.flush();
-			writer.close();
+
+			if(generateOutputFile){
+				writer[1].flush();
+				writer[1].close();
+			}
+
 		}catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -424,8 +469,8 @@ public class Active extends JPanel implements ActionListener{
 		if(reachFlag){
 			System.out.println(":) Hooray this molecule reached to destination");
 			try {
-				fw.write(elapsed + "\t\t\t"+elapsedSteps + newline);
-				fw.flush();
+				writer[0].write(elapsed + "\t\t\t"+elapsedSteps + newline);
+				writer[0].flush();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

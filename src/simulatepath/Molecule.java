@@ -8,22 +8,25 @@ public class Molecule {
 	private Position position;
 	private double velRail;
 	private MicroTubule currentMicrotubule;
+	private double radius;
 	/* This constructor is for active propagation */
 	public Molecule(double stepLengthX, double stepLengthY, 
-			double stepLengthZ, Position position, double velRail){
+			double stepLengthZ, Position position, double velRail, double radius){
 		this.setStepLengthX(stepLengthX);
 		this.setStepLengthY(stepLengthY);
 		this.setStepLengthZ(stepLengthZ);
 		this.setPosition(position);
 		this.setVelRail(velRail);
+		this.setRadius(radius);
 	}
 	/* This constructor is for passive propagation */
 	public Molecule(double stepLengthX, double stepLengthY, 
-			double stepLengthZ, Position position){
+			double stepLengthZ, Position position, double radius){
 		this.setStepLengthX(stepLengthX);
 		this.setStepLengthY(stepLengthY);
 		this.setStepLengthZ(stepLengthZ);
 		this.setPosition(position);
+		this.setRadius(radius);
 	}
 	
 	public double getStepLengthX() {
@@ -61,5 +64,11 @@ public class Molecule {
 	}
 	public void setCurrentMicrotubule(MicroTubule currentMicrotubule) {
 		this.currentMicrotubule = currentMicrotubule;
+	}
+	public double getRadius() {
+		return radius;
+	}
+	public void setRadius(double radius) {
+		this.radius = radius;
 	}
 }
