@@ -361,7 +361,7 @@ public class Active extends JPanel implements ActionListener{
 		if(reachFlag){
 			System.out.println(":) Hooray this molecule reached to destination");
 			try {
-				writer[0].write(elapsed + newline);
+				writer[0].write(elapsed + "\n");
 				writer[0].flush();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block

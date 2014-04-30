@@ -36,7 +36,7 @@ recieverCenter (15,0,0)
 recieverRadius 2
  
 *********Information about Molecules******************
-noOfMolecules 5000
+noOfMolecules 2000
 stepLengthX 1
 stepLengthY 1
 stepLengthZ 1

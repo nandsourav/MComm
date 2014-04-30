@@ -220,25 +220,25 @@ public class Collision extends JPanel implements ActionListener{
 		br.close();
 	}
 
-	public static boolean hasReachDestination(Position curpos){
+	public static boolean hasReachDestination(Molecule mol){
 		boolean b = false;
-		if(curpos.getDistance(reciever) <= recieverRadius)
+		if(mol.getPosition().getDistance(reciever) <= recieverRadius+mol.getRadius())
 			b=true;
 		return b;
 	}
 
-	private static void checkBoundary(Position curpos) {
-		if(curpos.getX() > mediumDimensionX/2)
+	private static void checkBoundary(Position curpos, double rad) {
+		if(curpos.getX()+ rad> mediumDimensionX/2)
 			curpos.setX(mediumDimensionX/2);
-		if(curpos.getX() < -mediumDimensionX/2)
+		if(curpos.getX()-rad < -mediumDimensionX/2)
 			curpos.setX(-mediumDimensionX/2);
-		if(curpos.getY() > mediumDimensionY/2)
+		if(curpos.getY()+rad > mediumDimensionY/2)
 			curpos.setY(mediumDimensionY/2);
-		if(curpos.getY() < -mediumDimensionY/2)
+		if(curpos.getY()-rad < -mediumDimensionY/2)
 			curpos.setY(-mediumDimensionY/2);
-		if(curpos.getZ() > mediumDimensionZ/2)
+		if(curpos.getZ()+rad > mediumDimensionZ/2)
 			curpos.setZ(mediumDimensionZ/2);
-		if(curpos.getZ() < -mediumDimensionZ/2)
+		if(curpos.getZ()-rad < -mediumDimensionZ/2)
 			curpos.setZ(-mediumDimensionZ/2);
 	}
 
@@ -283,7 +283,7 @@ public class Collision extends JPanel implements ActionListener{
 							newline = "\n";
 							writers.get(molecule).flush();
 						}
-						if(hasReachDestination(curpos)){
+						if(hasReachDestination(molecule)){
 							if(maxSimulationStep<=0){
 								molecule.setReachTime(System.nanoTime()-time);
 							}
@@ -310,7 +310,7 @@ public class Collision extends JPanel implements ActionListener{
 									newPos.setX(curpos.getX() + molecule.getStepLengthX()*steparr[(int) (Math.random()*3)]);
 									newPos.setY(curpos.getY() + molecule.getStepLengthY()*steparr[(int) (Math.random()*3)]);
 									newPos.setZ(curpos.getZ() + molecule.getStepLengthZ()*steparr[(int) (Math.random()*3)]);
-									checkBoundary(newPos);
+									checkBoundary(newPos,molecule.getRadius());
 									Position nextPos = checkRailPos(curpos,newPos,molecule);
 									if(nextPos!=null){
 										//distance = curpos.getDistance(reciever);
@@ -363,7 +363,7 @@ public class Collision extends JPanel implements ActionListener{
 								newPos.setX(curpos.getX() + molecule.getStepLengthX()*steparr[(int) (Math.random()*3)]);
 								newPos.setY(curpos.getY() + molecule.getStepLengthY()*steparr[(int) (Math.random()*3)]);
 								newPos.setZ(curpos.getZ() + molecule.getStepLengthZ()*steparr[(int) (Math.random()*3)]);
-								checkBoundary(newPos);
+								checkBoundary(newPos,molecule.getRadius());
 								Position nextPos = checkRailPos(curpos,newPos,molecule);
 								if(nextPos!=null){
 									//distance = curpos.getDistance(reciever);
@@ -389,7 +389,7 @@ public class Collision extends JPanel implements ActionListener{
 							Position temp = new Position(curpos.getX() + molecule.getStepLengthX()*steparr[(int) (Math.random()*3)],
 									curpos.getY() + molecule.getStepLengthY()*steparr[(int) (Math.random()*3)],
 									curpos.getZ() + molecule.getStepLengthZ()*steparr[(int) (Math.random()*3)]);
-							checkBoundary(temp);
+							checkBoundary(temp,molecule.getRadius());
 							if(molecule.check(temp,listOfMolecule)){
 								molecule.setPosition(temp);
 							}
