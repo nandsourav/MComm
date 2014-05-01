@@ -230,7 +230,7 @@ public class Active extends JPanel implements ActionListener{
 		long time = System.nanoTime();
 		long elapsed = 0;
 		double runStep = maxSimulationTime;
-		boolean reachFlag = false;
+//		boolean reachFlag = false;
 		boolean onRailFlag = false;
 		//double distance = distSendReciever!=0?distSendReciever:;
 		if(maxSimulationStep>0){
@@ -251,13 +251,7 @@ public class Active extends JPanel implements ActionListener{
 					}
 				}
 			}
-			while(elapsed < (long)runStep){
-				if(maxSimulationStep<=0){
-					elapsed = System.nanoTime()-time;
-				}
-				else{
-					elapsed+=1;
-				}
+			while((elapsed=(maxSimulationStep<=0)?(System.nanoTime()-time):(elapsed+1)) < (long)runStep){
 				curpos = molecule.getPosition();
 				if(generateOutputFile){
 					writer[1].write(newline + curpos.getX() +
@@ -267,8 +261,13 @@ public class Active extends JPanel implements ActionListener{
 				}
 				
 				if(hasReachDestination(curpos)){
-					reachFlag = true;
-					elapsed=System.nanoTime()-time;
+					if(maxSimulationStep<=0){
+						molecule.setReachTime(System.nanoTime()-time);
+					}
+					else{
+						molecule.setReachTime(elapsed);
+					}
+					molecule.setReachFlag(true);
 					break;
 				}
 				if(probDrail!=0){
@@ -358,10 +357,10 @@ public class Active extends JPanel implements ActionListener{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		if(reachFlag){
+		if(molecule.isReachFlag()){
 			System.out.println(":) Hooray this molecule reached to destination");
 			try {
-				writer[0].write(elapsed + "\n");
+				writer[0].write(molecule.getReachTime()+"\n");
 				writer[0].flush();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block

@@ -5,9 +5,9 @@
 **********mediumDimension* # means, range of our co-ordinate system in * dimension is [-#/2,#/2]************
 **********Please enter below the appropriate value of # in x,y,z direction *********************
  
-mediumDimensionX 200
-mediumDimensionY 200
-mediumDimensionZ 200
+mediumDimensionX 100
+mediumDimensionY 100
+mediumDimensionZ 100
  
 *********Specify the length of simulation for a molecule************
 *********maxSimulationStep # means, the simulation will generate a maximum of # no. of steps for each molecule, unless it reaches its destination**********
@@ -28,15 +28,15 @@ maxSimulationTime 0
 ********* y-coordinate [-mediumDimensionY/2 , mediumDimensionY/2]
 ********* z-coordinate [-mediumDimensionZ/2 , mediumDimensionZ/2]
  
-distSendReciever 30
-senderPosition (-15,0,0)
-recieverCenter (15,0,0)
+distSendReciever 10
+senderPosition (-5,0,0)
+recieverCenter (5,0,0)
  
 **********The receiver is considered as spherical volume. So please enter a radius of the receiver below.**********
 recieverRadius 2
  
 *********Information about Molecules******************
-noOfMolecules 2000
+noOfMolecules 10
 stepLengthX 1
 stepLengthY 1
 stepLengthZ 1
@@ -47,8 +47,8 @@ velRail 1
 probDrail 0.01
  
 ********Information about microtubule cylindrical tracks************
-plusEndCentre (15,0,0)
-minusEndCentre (-15,0,0)
+plusEndCentre (5,0,0)
+minusEndCentre (-5,0,0)
 radiusMicroTubule 1
  
-OutputFile Off
+OutputFile On
