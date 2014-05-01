@@ -49,7 +49,7 @@ public class Active extends JPanel implements ActionListener{
 			readParams(inFile);
 		else
 			readParams(args[0]);
-		final FileWriter fileWriter= new FileWriter(new File(reachFile+".txt"));
+		final FileWriter fileWriter= new FileWriter(new File(reachFile+".dat"));
 //		final ArrayList<Molecule> mols = new ArrayList<Molecule>(noOfMolecules);
 //		final ArrayList<FileWriter> writers = new ArrayList<FileWriter>(noOfMolecules);
 		//FileWriter writer= new FileWriter(new File(outFile));

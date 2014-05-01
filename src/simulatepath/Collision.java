@@ -51,7 +51,7 @@ public class Collision extends JPanel implements ActionListener{
 			readParams(inFile);
 		else
 			readParams(args[0]);
-		final FileWriter fileWriter= new FileWriter(new File(reachFile+".txt"));
+		final FileWriter fileWriter= new FileWriter(new File(reachFile+".dat"));
 		final ArrayList<Molecule> mols = new ArrayList<Molecule>(noOfMolecules);
 		final Map<Molecule,FileWriter> writers = new Hashtable<Molecule,FileWriter>(noOfMolecules);
 		//FileWriter writer= new FileWriter(new File(outFile));
