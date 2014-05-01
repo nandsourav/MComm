@@ -293,7 +293,7 @@ public class Collision extends JPanel implements ActionListener{
 							molecule.setReachFlag(true);
 							System.out.println(":) Hooray this molecule reached to destination");
 							try {
-								writer.write(elapsed+"index\n");
+								writer.write(elapsed+"\n");
 								writer.flush();
 							} catch (IOException e) {
 								// TODO Auto-generated catch block
