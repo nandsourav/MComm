@@ -59,7 +59,11 @@ It exhibits a property of multiple microtubules.
 If the user enters one set of values for plusEndCentre () minusEndCentre () radiusMicroTubule , then it is considered as 1 microtubule in the medium.
 If the user enters second set of values then it is considered as 2 microtubules and so on.
 
+Command line options:
+---------------------
 
+-input [filename] - Specifies the name of the parameter file to use.
+-reachfile [filename] - Specifies the name of the output file containing the time values for molecules reaching the destination
 
 
 
