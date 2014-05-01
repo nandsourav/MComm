@@ -49,7 +49,7 @@ public class Active extends JPanel implements ActionListener{
 			readParams(inFile);
 		else
 			readParams(args[0]);
-		final FileWriter fileWriter= new FileWriter(new File(reachFile+".txt"));
+		final FileWriter fileWriter= new FileWriter(new File(reachFile+".dat"));
 //		final ArrayList<Molecule> mols = new ArrayList<Molecule>(noOfMolecules);
 //		final ArrayList<FileWriter> writers = new ArrayList<FileWriter>(noOfMolecules);
 		//FileWriter writer= new FileWriter(new File(outFile));
@@ -361,7 +361,7 @@ public class Active extends JPanel implements ActionListener{
 		if(reachFlag){
 			System.out.println(":) Hooray this molecule reached to destination");
 			try {
-				writer[0].write(elapsed + newline);
+				writer[0].write(elapsed + "\n");
 				writer[0].flush();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block

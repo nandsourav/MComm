@@ -75,18 +75,18 @@ public class Molecule {
 	public void setRadius(double radius) {
 		this.radius = radius;
 	}
-	public boolean check(Position newPos, ArrayList<Molecule> listOfMolecule, int indexOfMolecule) {
+	public boolean check(Position newPos, ArrayList<Molecule> listOfMolecule) {
 		// TODO Auto-generated method stub
-		int flag=0;
+		//int flag=0;
 		for(Molecule m : listOfMolecule){
-			if(!m.isReachFlag() && (indexOfMolecule!=flag)){
+			if(!m.isReachFlag() && !m.equals(this)){
 				if(m.getPosition().getDistance(newPos)<(m.getRadius()+this.getRadius())){
-					System.out.println("between"+indexOfMolecule+" and "+flag);
-					System.out.println(m.getPosition().getDistance(newPos) +" < "+(m.getRadius()+this.getRadius()));
+					//System.out.println("between"+indexOfMolecule+" and "+flag);
+//					System.out.println(m.getPosition().getDistance(newPos) +" < "+(m.getRadius()+this.getRadius()));
 					return false;
 				}
 			}
-			flag++;
+		//	flag++;
 		}
 		return true;
 	}
