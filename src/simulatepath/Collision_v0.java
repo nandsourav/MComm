@@ -14,7 +14,7 @@ import java.util.Map;
 
 import javax.swing.JPanel;
 
-public class Collision extends JPanel implements ActionListener{
+public class Collision_v0 extends JPanel implements ActionListener{
 
 	/**
 	 * 
@@ -44,7 +44,6 @@ public class Collision extends JPanel implements ActionListener{
 	private static MicroTubule microtubule;
 	private static ArrayList<MicroTubule> listOfMicroTubule = new ArrayList<MicroTubule>();
 	private static double radius;
-	private static int noOfRun;
 	static boolean generateOutputFile = false;
 	public static void main(String[] args) throws IOException{
 
@@ -60,7 +59,10 @@ public class Collision extends JPanel implements ActionListener{
 			new File("output").mkdir();
 		}
 		for(int i=0;i<noOfMolecules;i++){
-			Position p = new Position();
+			final Position p = new Position();
+			p.setX(sender.getX());
+			p.setY(sender.getY());
+			p.setZ(sender.getZ());
 			//final int j = i;
 			Molecule temp = new Molecule(stepLengthX, stepLengthY, stepLengthZ, p,velRail,radius);
 			mols.add(i,temp);
@@ -69,21 +71,12 @@ public class Collision extends JPanel implements ActionListener{
 			}
 		}
 		if(generateOutputFile){
-			for(int i=0;i<noOfRun;i++){
-				(new Collision()).simulatePropagation(mols, fileWriter, writers);
-			}
+			(new Collision_v0()).simulatePropagation(mols, fileWriter, writers);
 		}
 		else{
-			for(int i=0;i<noOfRun;i++){
-				(new Collision()).simulatePropagation(mols,fileWriter, null);
-			}
+			(new Collision_v0()).simulatePropagation(mols,fileWriter, null);
 		}
-		fileWriter.close();
-		if(generateOutputFile){
-			for(Map.Entry<Molecule, FileWriter> entry : writers.entrySet()){
-				entry.getValue().close();
-			}
-		}
+
 		//			writers.add(i, new FileWriter(new File(outFile+i+".txt")));
 		//			javax.swing.SwingUtilities.invokeLater(new Runnable() {
 		//				public void run() {
@@ -218,9 +211,7 @@ public class Collision extends JPanel implements ActionListener{
 			else if (line.startsWith("radiusOfMolecule")){
 				radius = Double.parseDouble(param);
 			}
-			else if(line.startsWith("noOfSimulationRun")){
-				noOfRun = Integer.parseInt(param);
-			}
+
 			else if (line.startsWith("OutputFile On")){
 				generateOutputFile = true;
 			}
@@ -257,21 +248,7 @@ public class Collision extends JPanel implements ActionListener{
 		long elapsed = 0;
 		double runStep = maxSimulationTime;
 		Position curpos = null;
-		RandomDistribute.distribute(mediumDimensionX, mediumDimensionY, mediumDimensionZ, listOfMolecule, radius);
-		Molecule infoMolecule = null;
-		for(Molecule molecule : listOfMolecule){
-			if(sender.getDistance(molecule.getPosition())<2*molecule.getRadius()){
-				infoMolecule = molecule;
-				break;
-			}
-		}
-		if(infoMolecule==null){
-			infoMolecule = listOfMolecule.get((int)(Math.random()*noOfMolecules));
-		}
-		infoMolecule.getPosition().setX(sender.getX());
-		infoMolecule.getPosition().setY(sender.getY());
-		infoMolecule.getPosition().setZ(sender.getZ());
-		
+		//double distance = distSendReciever!=0?distSendReciever:;
 		if(maxSimulationStep>0){
 			runStep = maxSimulationStep;
 		}
@@ -296,6 +273,7 @@ public class Collision extends JPanel implements ActionListener{
 		try {	
 			while((elapsed=(maxSimulationStep<=0)?(System.nanoTime()-time):(elapsed+1)) < (long)runStep){
 				for(Molecule molecule:listOfMolecule){
+					if(!molecule.isReachFlag()){
 						curpos = molecule.getPosition();
 						//molecule.setReachTime(molecule.getReachTime()+1);
 						if(generateOutputFile){
@@ -305,14 +283,14 @@ public class Collision extends JPanel implements ActionListener{
 							newline = "\n";
 							writers.get(molecule).flush();
 						}
-						if(molecule.equals(infoMolecule) && hasReachDestination(infoMolecule)){
+						if(hasReachDestination(molecule)){
 							if(maxSimulationStep<=0){
-								infoMolecule.setReachTime(System.nanoTime()-time);
+								molecule.setReachTime(System.nanoTime()-time);
 							}
 							else{
-								infoMolecule.setReachTime(elapsed);
+								molecule.setReachTime(elapsed);
 							}
-							infoMolecule.setReachFlag(true);
+							molecule.setReachFlag(true);
 							System.out.println(":) Hooray this molecule reached to destination");
 							try {
 								writer.write(elapsed+"\n");
@@ -321,7 +299,7 @@ public class Collision extends JPanel implements ActionListener{
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
-							break;
+							continue;
 						}
 						if(probDrail!=0){   //Active simulation starts
 							if(molecule.getCurrentMicrotubule()!=null){
@@ -341,7 +319,7 @@ public class Collision extends JPanel implements ActionListener{
 											System.out.println("On Rail");
 										}
 										else{
-											System.out.println("Collision happened in random space1");
+											//System.out.println("Collision happened in random space1");
 										}
 									}
 								}
@@ -374,7 +352,7 @@ public class Collision extends JPanel implements ActionListener{
 										molecule.setPosition(temp);
 									}
 									else{
-										System.out.println("Collision occured while on rail");
+										//System.out.println("Collision occured while on rail");
 									}
 									//System.out.println(curpos.getX()+","+curpos.getY()+","+curpos.getZ());
 									//molecule.setPosition(curpos);
@@ -391,7 +369,7 @@ public class Collision extends JPanel implements ActionListener{
 									//distance = curpos.getDistance(reciever);
 									if(molecule.check(nextPos,listOfMolecule)){
 										molecule.setPosition(nextPos);
-										System.out.println("Gets On Rail");
+										//System.out.println("Gets On Rail");
 									}
 									else{
 										//System.out.println("Collision happened in random space3");
@@ -422,25 +400,28 @@ public class Collision extends JPanel implements ActionListener{
 						if(generateOutputFile){
 							writers.get(molecule).flush();
 						}
+					}
 				}
-				if(infoMolecule.isReachFlag())
+				ArrayList<Molecule> temp = new ArrayList<Molecule>();
+				for(Molecule molecule:listOfMolecule){
+					if(molecule.isReachFlag()){
+						temp.add(molecule);
+					}
+				}
+				for(Molecule k:temp){
+					listOfMolecule.remove(k);
+				}
+				if(listOfMolecule.size()==0)
 					break;
-//				ArrayList<Molecule> temp = new ArrayList<Molecule>();
-//				for(Molecule molecule:listOfMolecule){
-//					if(molecule.isReachFlag()){
-//						temp.add(molecule);
-//					}
-//				}
-//				for(Molecule k:temp){
-//					listOfMolecule.remove(k);
-//				}
-//				if(listOfMolecule.size()==0)
-//					break;
-//				else
-//					System.out.println(listOfMolecule.size());
-				
+				else
+					System.out.println(listOfMolecule.size());
 			}
-			
+			writer.close();
+			if(generateOutputFile){
+				for(Map.Entry<Molecule, FileWriter> entry : writers.entrySet()){
+					entry.getValue().close();
+				}
+			}
 		}catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
