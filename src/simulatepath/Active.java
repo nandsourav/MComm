@@ -45,10 +45,13 @@ public class Active extends JPanel implements ActionListener{
 	static boolean generateOutputFile = false;
 	public static void main(String[] args) throws IOException{
 
+
 		if(args.length==0)
 			readParams(inFile);
 		else
-			readParams(args[0]);
+			//readParams(args[0]);
+			parseCmdLine(args);
+		
 		final FileWriter fileWriter= new FileWriter(new File(reachFile+".dat"));
 //		final ArrayList<Molecule> mols = new ArrayList<Molecule>(noOfMolecules);
 //		final ArrayList<FileWriter> writers = new ArrayList<FileWriter>(noOfMolecules);
@@ -201,6 +204,59 @@ public class Active extends JPanel implements ActionListener{
 			
 		}
 		br.close();
+	}
+	public static void parseCmdLine (String [] args){
+		//Snippet from http://journals.ecs.soton.ac.uk/java/tutorial/java/cmdLineArgs/parsing.html
+		int i = 0, j;
+	    String arg;
+	    char flag;
+	    boolean vflag = true;//false;
+	    String reachfile = "";
+	    String inputfile = "";
+
+	    while (i < args.length && args[i].startsWith("-")) {
+	        arg = args[i++];
+
+	// use this type of check for "wordy" arguments
+	        if (arg.equals("-verbose")) {
+	            System.out.println("verbose mode on");
+	            vflag = true;
+	        }
+
+	// use this type of check for arguments that require arguments
+	        else if (arg.equals("-reachfile")) {
+	            if (i < args.length)
+	                reachfile = args[i++];
+	            else
+	                System.err.println("-reachfile requires a filename");
+	            if (vflag)
+	                System.out.println("output (reach) file = " + reachfile);
+	        }
+	    
+	        else if (arg.equals("-input")) {
+	            if (i < args.length)
+	                inputfile = args[i++];
+	            else
+	                System.err.println("-input requires a filename");
+	            if (vflag)
+	                System.out.println("intput file = " + inputfile);
+	            try {
+					readParams(inputfile);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	        }
+
+	    }
+	    if (i < args.length){
+	        //System.err.println("Usage: Collision [-verbose] [-xn] [-output afile] filename");
+	    	System.err.println("Usage: Active  [-input afile] [-reachfile afile] ");
+	    	System.exit(0);
+	    }
+	    else
+	        System.out.println("Success!");
+	    reachFile = reachfile;
 	}
 
 	public static boolean hasReachDestination(Position curpos){

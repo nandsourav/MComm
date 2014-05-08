@@ -222,7 +222,7 @@ public class Collision extends JPanel implements ActionListener{
 		br.close();
 	}
 public static void parseCmdLine (String [] args){
-	//snippets from http://journals.ecs.soton.ac.uk/java/tutorial/java/cmdLineArgs/parsing.html
+	//Snippit from http://journals.ecs.soton.ac.uk/java/tutorial/java/cmdLineArgs/parsing.html
 	int i = 0, j;
     String arg;
     char flag;
@@ -248,7 +248,7 @@ public static void parseCmdLine (String [] args){
             if (vflag)
                 System.out.println("output (reach) file = " + reachfile);
         }
-     // use this type of check for arguments that require arguments
+   
         else if (arg.equals("-input")) {
             if (i < args.length)
                 inputfile = args[i++];
