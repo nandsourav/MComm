@@ -50,7 +50,9 @@ public class Collision extends JPanel implements ActionListener{
 		if(args.length==0)
 			readParams(inFile);
 		else
-			readParams(args[0]);
+			//readParams(args[0]);
+			parseCmdLine(args);
+			
 		final FileWriter fileWriter= new FileWriter(new File(reachFile+".dat"));
 		final ArrayList<Molecule> mols = new ArrayList<Molecule>(noOfMolecules);
 		final Map<Molecule,FileWriter> writers = new Hashtable<Molecule,FileWriter>(noOfMolecules);
@@ -219,6 +221,59 @@ public class Collision extends JPanel implements ActionListener{
 		}
 		br.close();
 	}
+public static void parseCmdLine (String [] args){
+	//Snippit from http://journals.ecs.soton.ac.uk/java/tutorial/java/cmdLineArgs/parsing.html
+	int i = 0, j;
+    String arg;
+    char flag;
+    boolean vflag = true;//false;
+    String reachfile = "";
+    String inputfile = "";
+
+    while (i < args.length && args[i].startsWith("-")) {
+        arg = args[i++];
+
+// use this type of check for "wordy" arguments
+        if (arg.equals("-verbose")) {
+            System.out.println("verbose mode on");
+            vflag = true;
+        }
+
+// use this type of check for arguments that require arguments
+        else if (arg.equals("-reachfile")) {
+            if (i < args.length)
+                reachfile = args[i++];
+            else
+                System.err.println("-reachfile requires a filename");
+            if (vflag)
+                System.out.println("output (reach) file = " + reachfile);
+        }
+   
+        else if (arg.equals("-input")) {
+            if (i < args.length)
+                inputfile = args[i++];
+            else
+                System.err.println("-input requires a filename");
+            if (vflag)
+                System.out.println("intput file = " + inputfile);
+            try {
+				readParams(inputfile);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        }
+
+    }
+    if (i < args.length){
+        //System.err.println("Usage: Collision [-verbose] [-xn] [-output afile] filename");
+    	System.err.println("Usage: Collision  [-input afile] [-reachfile afile] ");
+    	System.exit(0);
+    }
+    else
+        System.out.println("Success!");
+    reachFile = reachfile;
+}
 
 	public static boolean hasReachDestination(Molecule mol){
 		boolean b = false;
@@ -248,6 +303,7 @@ public class Collision extends JPanel implements ActionListener{
 		long elapsed = 0;
 		double runStep = maxSimulationTime;
 		Position curpos = null;
+		long collisionCount = 0;
 		//double distance = distSendReciever!=0?distSendReciever:;
 		if(maxSimulationStep>0){
 			runStep = maxSimulationStep;
@@ -380,7 +436,9 @@ public class Collision extends JPanel implements ActionListener{
 										molecule.setPosition(newPos);
 									}
 									else{
-										System.out.println("Collision happened in random space4");
+										//cut down on output, report every 2000.
+										if (++collisionCount%2000 == 0)
+										System.out.println(collisionCount+" collisions happened in random space4");
 									}							
 								}
 							}
